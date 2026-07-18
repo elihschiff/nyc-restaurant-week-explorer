@@ -11,7 +11,10 @@
     "build:pages": "next build",
     "start": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "data:build": "python3 scripts/build_ui_data.py"
+    "test:data": "python3 -m unittest discover -s tests",
+    "data:build": "python3 scripts/build_ui_data.py",
+    "data:health": "python3 scripts/enrich_health_inspections.py",
+    "data:refresh": "npm run data:build && npm run data:health"
   },
   "dependencies": {
     "lucide-react": "^1.25.0",

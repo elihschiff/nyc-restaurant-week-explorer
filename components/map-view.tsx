@@ -6,7 +6,9 @@ import { Crosshair, Expand, Heart, LocateFixed, MapPin, Menu, X } from "lucide-r
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type { LocationPoint, Restaurant } from "@/lib/types";
 import {
+  displayHealthGrade,
   formatDistance,
+  healthGradeClass,
   imageFor,
   longitudeOf,
   uniquePrices,
@@ -420,6 +422,14 @@ export default function MapView({
                 <span>{selectedPrices.map((price) => `$${price}`).join(" / ")}</span>
               ) : null}
             </div>
+            {selected.healthInspection ? (
+              <div className={`map-health-badge ${healthGradeClass(selected.healthInspection.grade)}`}>
+                {displayHealthGrade(selected.healthInspection.grade)}
+                {selected.healthInspection.score !== null
+                  ? ` · ${selected.healthInspection.score} pts`
+                  : ""}
+              </div>
+            ) : null}
             <div className="map-peek-buttons">
               <button type="button" onClick={() => onOpenDetails(selected)}>
                 <Menu size={15} /> Details

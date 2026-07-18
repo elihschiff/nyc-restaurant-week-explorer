@@ -4,6 +4,33 @@ export type Coordinates = {
   lng?: number;
 };
 
+export type HealthInspectionSummary = {
+  date: string | null;
+  result: string | null;
+  score: number | null;
+  violationCount: number;
+  criticalViolationCount: number;
+};
+
+export type HealthInspection = {
+  camis: string;
+  grade: string;
+  score: number | null;
+  inspectionDate: string | null;
+  inspectionResult: string | null;
+  violationCount: number;
+  criticalViolationCount: number;
+  violations: Array<{
+    description: string;
+    critical: boolean;
+  }>;
+  inspectionHistory: HealthInspectionSummary[];
+  officialUrl: string;
+  matchedName: string;
+  matchedAddress: string;
+  matchedAt: string;
+};
+
 export type Restaurant = {
   name: string;
   slug: string;
@@ -52,6 +79,7 @@ export type Restaurant = {
   }>;
   social: Record<string, string>;
   detailSourceError: boolean;
+  healthInspection?: HealthInspection;
   distanceMiles?: number;
 };
 
@@ -68,7 +96,10 @@ export type RestaurantDataset = {
     mappedRestaurants: number;
     restaurantsWithMenus: number;
     boroughs: Record<string, number>;
+    healthInspectionsMatched?: number;
+    healthGrades?: Record<string, number>;
   };
+  healthInspectionsUpdatedAt?: string;
   restaurants: Restaurant[];
 };
 
@@ -86,7 +117,9 @@ export type SortMode =
   | "price"
   | "offers"
   | "weeks"
-  | "neighborhood";
+  | "neighborhood"
+  | "health-grade"
+  | "health-score";
 
 export type FilterState = {
   boroughs: string[];
@@ -99,6 +132,7 @@ export type FilterState = {
   accessibility: string[];
   dietaryNeeds: string[];
   amenities: string[];
+  healthGrades: string[];
   hasMenu: boolean;
   hasReservation: boolean;
   savedOnly: boolean;
@@ -116,6 +150,7 @@ export const EMPTY_FILTERS: FilterState = {
   accessibility: [],
   dietaryNeeds: [],
   amenities: [],
+  healthGrades: [],
   hasMenu: false,
   hasReservation: false,
   savedOnly: false,

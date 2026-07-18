@@ -19,6 +19,27 @@ export const BOROUGH_ORDER = [
   "Staten Island",
 ];
 
+export const HEALTH_GRADE_ORDER = [
+  "A",
+  "B",
+  "C",
+  "Grade Pending",
+  "Not Yet Graded",
+];
+
+export function displayHealthGrade(value: string): string {
+  if (value === "Grade Pending") return "Pending";
+  if (value === "Not Yet Graded") return "Not yet graded";
+  return `Grade ${value}`;
+}
+
+export function healthGradeClass(value: string): string {
+  if (value === "A") return "grade-a";
+  if (value === "B") return "grade-b";
+  if (value === "C") return "grade-c";
+  return "grade-pending";
+}
+
 export function longitudeOf(restaurant: Restaurant): number | null {
   if (!restaurant.coordinates) return null;
   return restaurant.coordinates.lon ?? restaurant.coordinates.lng ?? null;

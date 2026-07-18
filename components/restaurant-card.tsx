@@ -3,8 +3,10 @@
 import { ArrowUpRight, CalendarDays, FileText, Heart, MapPin } from "lucide-react";
 import type { Restaurant } from "@/lib/types";
 import {
+  displayHealthGrade,
   displayWeek,
   formatDistance,
+  healthGradeClass,
   imageFor,
   uniquePrices,
 } from "@/lib/explorer";
@@ -66,6 +68,14 @@ export default function RestaurantCard({
           {restaurant.menu ? (
             <div className="restaurant-card-menu-badge">
               <FileText size={12} /> Menu
+            </div>
+          ) : null}
+          {restaurant.healthInspection ? (
+            <div className={`restaurant-card-health ${healthGradeClass(restaurant.healthInspection.grade)}`}>
+              <strong>{displayHealthGrade(restaurant.healthInspection.grade)}</strong>
+              {restaurant.healthInspection.score !== null ? (
+                <span>{restaurant.healthInspection.score} pts</span>
+              ) : null}
             </div>
           ) : null}
         </div>

@@ -33,7 +33,9 @@ import type {
 import { EMPTY_FILTERS } from "@/lib/types";
 import {
   displayCollection,
+  displayHealthGrade,
   displayWeek,
+  HEALTH_GRADE_ORDER,
   mealPeriodMatches,
   minimumPrice,
   restaurantDistance,
@@ -91,6 +93,7 @@ function activeFilterCount(filters: FilterState): number {
     filters.accessibility.length +
     filters.dietaryNeeds.length +
     filters.amenities.length +
+    filters.healthGrades.length +
     Number(filters.hasMenu) +
     Number(filters.hasReservation) +
     Number(filters.savedOnly) +
@@ -129,7 +132,7 @@ function initialBrowserSettings(): {
     view: (["split", "list", "map"] as const).includes(requestedView as ViewMode)
       ? (requestedView as ViewMode)
       : "split",
-    sort: (["best-match", "name", "distance", "price", "offers", "weeks", "neighborhood"] as const).includes(
+    sort: (["best-match", "name", "distance", "price", "offers", "weeks", "neighborhood", "health-grade", "health-score"] as const).includes(
       requestedSort as SortMode,
     )
       ? (requestedSort as SortMode)
@@ -145,6 +148,7 @@ function initialBrowserSettings(): {
       accessibility: queryList(params, "access"),
       dietaryNeeds: queryList(params, "diet"),
       amenities: queryList(params, "amenity"),
+      healthGrades: queryList(params, "grade"),
       hasMenu: params.get("menu") === "1",
       hasReservation: params.get("reservation") === "1",
       savedOnly: params.get("saved") === "1",
@@ -195,6 +199,24 @@ function sortRestaurants(
     if (sort === "neighborhood") {
       return a.neighborhood.localeCompare(b.neighborhood) || a.name.localeCompare(b.name);
     }
+    if (sort === "health-score") {
+      return (
+        (a.healthInspection?.score ?? Number.POSITIVE_INFINITY) -
+          (b.healthInspection?.score ?? Number.POSITIVE_INFINITY) ||
+        a.name.localeCompare(b.name)
+      );
+    }
+    if (sort === "health-grade") {
+      const rawGradeA = a.healthInspection
+        ? HEALTH_GRADE_ORDER.indexOf(a.healthInspection.grade)
+        : -1;
+      const rawGradeB = b.healthInspection
+        ? HEALTH_GRADE_ORDER.indexOf(b.healthInspection.grade)
+        : -1;
+      const gradeA = rawGradeA < 0 ? Number.POSITIVE_INFINITY : rawGradeA;
+      const gradeB = rawGradeB < 0 ? Number.POSITIVE_INFINITY : rawGradeB;
+      return gradeA - gradeB || a.name.localeCompare(b.name);
+    }
     return a.name.localeCompare(b.name);
   });
 }
@@ -211,6 +233,7 @@ function filterLabel(key: keyof FilterState, value: string): string {
   }
   if (key === "weeks") return displayWeek(value);
   if (key === "collections") return displayCollection(value);
+  if (key === "healthGrades") return displayHealthGrade(value);
   return value;
 }
 
@@ -261,6 +284,7 @@ export default function RestaurantExplorer() {
       ["access", filters.accessibility],
       ["diet", filters.dietaryNeeds],
       ["amenity", filters.amenities],
+      ["grade", filters.healthGrades],
     ];
     lists.forEach(([key, values]) => {
       if (values.length) params.set(key, values.join("|"));
@@ -308,6 +332,9 @@ export default function RestaurantExplorer() {
       accessibility: countFacet(restaurants, (restaurant) => restaurant.accessibility),
       dietaryNeeds: countFacet(restaurants, (restaurant) => restaurant.dietaryNeeds),
       amenities: countFacet(restaurants, (restaurant) => restaurant.amenities),
+      healthGrades: countFacet(restaurants, (restaurant) =>
+        restaurant.healthInspection ? [restaurant.healthInspection.grade] : [],
+      ),
     }),
     [restaurants],
   );
@@ -338,6 +365,12 @@ export default function RestaurantExplorer() {
       if (!selectedIn(restaurant.accessibility, filters.accessibility)) return false;
       if (!selectedIn(restaurant.dietaryNeeds, filters.dietaryNeeds)) return false;
       if (!selectedIn(restaurant.amenities, filters.amenities)) return false;
+      if (
+        filters.healthGrades.length &&
+        (!restaurant.healthInspection ||
+          !filters.healthGrades.includes(restaurant.healthInspection.grade))
+      )
+        return false;
       if (filters.hasMenu && !restaurant.menu) return false;
       if (filters.hasReservation && !restaurant.reservation) return false;
       if (filters.savedOnly && !saved.has(restaurant.slug)) return false;
@@ -409,7 +442,10 @@ export default function RestaurantExplorer() {
     }
   }, []);
 
-  const toggleQuickArray = (key: "prices" | "mealPeriods" | "boroughs", value: string) => {
+  const toggleQuickArray = (
+    key: "prices" | "mealPeriods" | "boroughs" | "healthGrades",
+    value: string,
+  ) => {
     const current = filters[key];
     setFilters({
       ...filters,
@@ -445,6 +481,7 @@ export default function RestaurantExplorer() {
       "accessibility",
       "dietaryNeeds",
       "amenities",
+      "healthGrades",
     ];
     arrayKeys.forEach((key) => {
       (filters[key] as string[]).forEach((value) =>
@@ -561,14 +598,15 @@ export default function RestaurantExplorer() {
             ["mealPeriods", "weekday-lunch", "Lunch"],
             ["mealPeriods", "weekday-dinner", "Dinner"],
             ["boroughs", "Brooklyn", "Brooklyn"],
+            ["healthGrades", "A", "NYC grade A"],
           ].map(([key, value, label]) => {
-            const active = (filters[key as "prices" | "mealPeriods" | "boroughs"] as string[]).includes(value);
+            const active = (filters[key as "prices" | "mealPeriods" | "boroughs" | "healthGrades"] as string[]).includes(value);
             return (
               <button
                 type="button"
                 key={`${key}-${value}`}
                 className={`quick-filter ${active ? "is-active" : ""}`}
-                onClick={() => toggleQuickArray(key as "prices" | "mealPeriods" | "boroughs", value)}
+                onClick={() => toggleQuickArray(key as "prices" | "mealPeriods" | "boroughs" | "healthGrades", value)}
               >
                 {active ? <Check size={13} /> : null}
                 {label}
@@ -678,6 +716,8 @@ export default function RestaurantExplorer() {
                 <option value="offers">Most meal offers</option>
                 <option value="weeks">Most weeks</option>
                 <option value="neighborhood">Neighborhood</option>
+                <option value="health-grade">NYC health grade</option>
+                <option value="health-score">Lowest inspection score</option>
               </select>
               <ChevronDown size={14} />
             </label>

@@ -651,6 +651,61 @@ a {
   color: var(--ink-soft);
 }
 
+.restaurant-card-health {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  min-height: 29px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 7px;
+  background: rgba(255, 253, 247, 0.96);
+  box-shadow: 0 2px 10px rgba(26, 22, 16, 0.18);
+  color: var(--ink-soft);
+  font-size: 9px;
+}
+
+.restaurant-card-health strong {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  color: white;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+}
+
+.restaurant-card-health span {
+  padding: 0 7px;
+  font-weight: 800;
+}
+
+.restaurant-card-health.grade-a strong,
+.health-grade-tile.grade-a,
+.map-health-badge.grade-a {
+  background: #287f59;
+}
+
+.restaurant-card-health.grade-b strong,
+.health-grade-tile.grade-b,
+.map-health-badge.grade-b {
+  background: #bb7616;
+}
+
+.restaurant-card-health.grade-c strong,
+.health-grade-tile.grade-c,
+.map-health-badge.grade-c {
+  background: #b7352e;
+}
+
+.restaurant-card-health.grade-pending strong,
+.health-grade-tile.grade-pending,
+.map-health-badge.grade-pending {
+  background: #596661;
+}
+
 .restaurant-card-content {
   padding: 15px 16px 16px;
 }
@@ -1401,6 +1456,18 @@ a {
   margin-top: 11px;
 }
 
+.map-health-badge {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  margin-top: 8px;
+  border-radius: 5px;
+  padding: 0 7px;
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+}
+
 .map-peek-buttons button {
   display: inline-flex;
   height: 30px;
@@ -1695,6 +1762,188 @@ a {
 
 .detail-section-heading h3 {
   margin: 0;
+}
+
+.health-inspection-summary {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr 1.25fr;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: white;
+}
+
+.health-inspection-summary > div {
+  display: flex;
+  min-width: 0;
+  min-height: 72px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 12px;
+}
+
+.health-inspection-summary > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.health-inspection-summary span,
+.health-history-heading,
+.health-score-note {
+  color: var(--ink-faint);
+}
+
+.health-inspection-summary span {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.health-inspection-summary strong {
+  font-size: 15px;
+}
+
+.health-inspection-summary strong small {
+  color: var(--ink-faint);
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.health-inspection-summary > div:last-child strong {
+  font-size: 11px;
+}
+
+.health-grade-tile {
+  align-self: flex-start;
+  border-radius: 5px;
+  padding: 5px 7px;
+  color: white;
+  font-size: 10px !important;
+}
+
+.health-score-note {
+  margin: 9px 2px 13px;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.health-history {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+
+.health-history > div {
+  display: grid;
+  min-height: 38px;
+  grid-template-columns: 1fr 46px;
+  align-items: center;
+  padding: 5px 10px;
+  font-size: 10px;
+}
+
+.health-history > div + div {
+  border-top: 1px solid #eee9df;
+}
+
+.health-history > div > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.health-history small {
+  overflow: hidden;
+  color: var(--ink-faint);
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.health-history > div > strong:last-child {
+  justify-self: end;
+  font-size: 12px;
+}
+
+.health-history-heading {
+  min-height: 27px !important;
+  background: #f4f1e9;
+  font-size: 8px !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.health-history-heading strong {
+  color: var(--ink-soft);
+}
+
+.health-history-heading span {
+  justify-self: end;
+}
+
+.health-violations {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+
+.health-violations summary {
+  display: flex;
+  min-height: 39px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.health-violations summary::-webkit-details-marker {
+  display: none;
+}
+
+.health-violations summary strong {
+  border-radius: 10px;
+  background: #f9e2de;
+  padding: 3px 6px;
+  color: #a9231c;
+  font-size: 8px;
+}
+
+.health-violations ul {
+  margin: 0;
+  border-top: 1px solid var(--line);
+  padding: 4px 12px 10px 27px;
+}
+
+.health-violations li {
+  padding: 7px 0;
+  color: var(--ink-soft);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.health-violations li strong {
+  margin-right: 5px;
+  color: #a9231c;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.health-official-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 11px;
+  color: var(--accent-dark);
+  font-size: 10px;
+  font-weight: 800;
 }
 
 .offer-table {

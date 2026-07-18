@@ -12,14 +12,17 @@ import {
   MapPin,
   Navigation,
   Phone,
+  ShieldCheck,
   Utensils,
   X,
 } from "lucide-react";
 import type { Restaurant } from "@/lib/types";
 import {
   displayCollection,
+  displayHealthGrade,
   displayMealType,
   formatDistance,
+  healthGradeClass,
   imageFor,
 } from "@/lib/explorer";
 
@@ -29,6 +32,15 @@ type DetailDrawerProps = {
   onClose: () => void;
   onToggleSaved: () => void;
 };
+
+function formatInspectionDate(value: string | null): string {
+  if (!value) return "Not available";
+  return new Date(`${value}T12:00:00`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 export default function DetailDrawer({
   restaurant,
@@ -152,6 +164,88 @@ export default function DetailDrawer({
                 <section className="detail-section detail-description">
                   <h3>About</h3>
                   <p>{restaurant.description || restaurant.summary}</p>
+                </section>
+              ) : null}
+
+              {restaurant.healthInspection ? (
+                <section className="detail-section health-inspection-section">
+                  <div className="detail-section-heading">
+                    <ShieldCheck size={18} />
+                    <h3>NYC health inspection</h3>
+                  </div>
+                  <div className="health-inspection-summary">
+                    <div>
+                      <span>Current grade</span>
+                      <strong className={`health-grade-tile ${healthGradeClass(restaurant.healthInspection.grade)}`}>
+                        {displayHealthGrade(restaurant.healthInspection.grade)}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Latest score</span>
+                      <strong>
+                        {restaurant.healthInspection.score ?? "—"}
+                        {restaurant.healthInspection.score !== null ? <small> points</small> : null}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Inspected</span>
+                      <strong>{formatInspectionDate(restaurant.healthInspection.inspectionDate)}</strong>
+                    </div>
+                  </div>
+                  <p className="health-score-note">
+                    The score is violation points from the latest inspection; lower is better.
+                    The grade is NYC Health&apos;s current posted grade.
+                  </p>
+
+                  {restaurant.healthInspection.inspectionHistory.length ? (
+                    <div className="health-history" aria-label="Recent inspection history">
+                      <div className="health-history-heading">
+                        <strong>Recent inspections</strong>
+                        <span>Score</span>
+                      </div>
+                      {restaurant.healthInspection.inspectionHistory.map((inspection) => (
+                        <div key={`${inspection.date}-${inspection.score}-${inspection.result}`}>
+                          <span>
+                            {formatInspectionDate(inspection.date)}
+                            <small>{inspection.result}</small>
+                          </span>
+                          <strong>{inspection.score ?? "—"}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  {restaurant.healthInspection.violations.length ? (
+                    <details className="health-violations">
+                      <summary>
+                        <span>
+                          Latest violations ({restaurant.healthInspection.violationCount})
+                        </span>
+                        {restaurant.healthInspection.criticalViolationCount ? (
+                          <strong>
+                            {restaurant.healthInspection.criticalViolationCount} critical
+                          </strong>
+                        ) : null}
+                      </summary>
+                      <ul>
+                        {restaurant.healthInspection.violations.map((violation, index) => (
+                          <li key={`${index}-${violation.description}`}>
+                            {violation.critical ? <strong>Critical</strong> : null}
+                            <span>{violation.description}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null}
+
+                  <a
+                    className="health-official-link"
+                    href={restaurant.healthInspection.officialUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View the official ABC Eats record <ExternalLink size={14} />
+                  </a>
                 </section>
               ) : null}
 

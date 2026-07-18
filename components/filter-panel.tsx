@@ -11,7 +11,13 @@ import {
   X,
 } from "lucide-react";
 import type { FilterState } from "@/lib/types";
-import { BOROUGH_ORDER, COLLECTION_LABELS, displayWeek } from "@/lib/explorer";
+import {
+  BOROUGH_ORDER,
+  COLLECTION_LABELS,
+  HEALTH_GRADE_ORDER,
+  displayHealthGrade,
+  displayWeek,
+} from "@/lib/explorer";
 
 export type FacetOption = { value: string; count: number };
 
@@ -24,6 +30,7 @@ export type ExplorerFacets = {
   accessibility: FacetOption[];
   dietaryNeeds: FacetOption[];
   amenities: FacetOption[];
+  healthGrades: FacetOption[];
 };
 
 type ArrayFilterKey =
@@ -36,7 +43,8 @@ type ArrayFilterKey =
   | "collections"
   | "accessibility"
   | "dietaryNeeds"
-  | "amenities";
+  | "amenities"
+  | "healthGrades";
 
 type FilterPanelProps = {
   filters: FilterState;
@@ -159,6 +167,13 @@ export default function FilterPanel({
   const boroughs = [...facets.boroughs].sort(
     (a, b) => BOROUGH_ORDER.indexOf(a.value) - BOROUGH_ORDER.indexOf(b.value),
   );
+  const healthGrades = [...facets.healthGrades].sort(
+    (a, b) => {
+      const indexA = HEALTH_GRADE_ORDER.indexOf(a.value);
+      const indexB = HEALTH_GRADE_ORDER.indexOf(b.value);
+      return (indexA < 0 ? 99 : indexA) - (indexB < 0 ? 99 : indexB);
+    },
+  );
 
   return (
     <aside className="filter-panel" aria-label="Restaurant filters">
@@ -230,6 +245,13 @@ export default function FilterPanel({
           selected={filters.cuisines}
           onToggle={(value) => toggleArray("cuisines", value)}
           searchable
+        />
+        <FacetSection
+          title="NYC health grade"
+          options={healthGrades}
+          selected={filters.healthGrades}
+          onToggle={(value) => toggleArray("healthGrades", value)}
+          labelTransform={displayHealthGrade}
         />
 
         <details className="filter-section" open>
