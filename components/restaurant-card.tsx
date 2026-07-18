@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, CalendarDays, FileText, Heart, MapPin } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Copy, FileText, Heart, MapPin } from "lucide-react";
 import type { Restaurant } from "@/lib/types";
 import {
   displayHealthGrade,
@@ -17,6 +17,7 @@ type RestaurantCardProps = {
   selected?: boolean;
   compact?: boolean;
   onOpen: () => void;
+  onCopyName: () => void;
   onSelect: () => void;
   onToggleSaved: () => void;
 };
@@ -27,6 +28,7 @@ export default function RestaurantCard({
   selected = false,
   compact = false,
   onOpen,
+  onCopyName,
   onSelect,
   onToggleSaved,
 }: RestaurantCardProps) {
@@ -44,7 +46,13 @@ export default function RestaurantCard({
       onMouseEnter={onSelect}
       onFocus={onSelect}
     >
-      <button type="button" className="restaurant-card-main" onClick={onOpen}>
+      <button
+        type="button"
+        className="restaurant-card-open-button"
+        onClick={onOpen}
+        aria-label={`View details for ${restaurant.name}`}
+      />
+      <div className="restaurant-card-main">
         <div className="restaurant-card-image-wrap">
           {image ? (
             // Image URLs come from the public NYC Tourism CDN.
@@ -90,7 +98,18 @@ export default function RestaurantCard({
               </span>
             ) : null}
           </div>
-          <h3>{restaurant.name}</h3>
+          <div className="restaurant-card-title-row">
+            <h3>{restaurant.name}</h3>
+            <button
+              type="button"
+              className="restaurant-name-copy"
+              onClick={onCopyName}
+              aria-label={`Copy ${restaurant.name}`}
+              title="Copy restaurant name"
+            >
+              <Copy size={13} />
+            </button>
+          </div>
           <p className="restaurant-card-cuisine">
             {restaurant.cuisines.slice(0, 3).join(" · ") || restaurant.borough}
           </p>
@@ -115,7 +134,7 @@ export default function RestaurantCard({
             </div>
           ) : null}
         </div>
-      </button>
+      </div>
 
       <button
         type="button"

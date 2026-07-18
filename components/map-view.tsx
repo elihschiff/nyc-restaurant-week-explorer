@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import maplibregl, { type GeoJSONSource, type Map as MapLibreMap } from "maplibre-gl";
-import { Crosshair, Expand, Heart, LocateFixed, MapPin, Menu, X } from "lucide-react";
+import { Copy, Crosshair, Expand, Heart, LocateFixed, MapPin, Menu, X } from "lucide-react";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type { LocationPoint, Restaurant } from "@/lib/types";
 import {
@@ -22,6 +22,7 @@ type MapViewProps = {
   saved: Set<string>;
   onSelect: (slug: string | null) => void;
   onOpenDetails: (restaurant: Restaurant) => void;
+  onCopyName: (name: string) => void;
   onRequestLocation: () => void;
   onToggleSaved: (slug: string) => void;
   layoutKey: string;
@@ -112,6 +113,7 @@ export default function MapView({
   saved,
   onSelect,
   onOpenDetails,
+  onCopyName,
   onRequestLocation,
   onToggleSaved,
   layoutKey,
@@ -415,7 +417,17 @@ export default function MapView({
                 <span> · {formatDistance(selected.distanceMiles)}</span>
               ) : null}
             </div>
-            <h3>{selected.name}</h3>
+            <div className="map-peek-title-row">
+              <h3>{selected.name}</h3>
+              <button
+                type="button"
+                onClick={() => onCopyName(selected.name)}
+                aria-label={`Copy ${selected.name}`}
+                title="Copy restaurant name"
+              >
+                <Copy size={14} />
+              </button>
+            </div>
             <div className="map-peek-meta">
               {selected.cuisines.slice(0, 2).join(" · ")}
               {selectedPrices.length ? (

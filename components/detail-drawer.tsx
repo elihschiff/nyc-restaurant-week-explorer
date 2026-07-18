@@ -6,6 +6,7 @@ import {
   ArrowUpRight,
   CalendarDays,
   CheckCircle2,
+  Copy,
   ExternalLink,
   FileText,
   Heart,
@@ -30,6 +31,7 @@ type DetailDrawerProps = {
   restaurant: Restaurant | null;
   saved: boolean;
   onClose: () => void;
+  onCopyName: (name: string) => void;
   onToggleSaved: () => void;
 };
 
@@ -46,6 +48,7 @@ export default function DetailDrawer({
   restaurant,
   saved,
   onClose,
+  onCopyName,
   onToggleSaved,
 }: DetailDrawerProps) {
   const [tab, setTab] = useState<"overview" | "menu">("overview");
@@ -106,7 +109,17 @@ export default function DetailDrawer({
                 <> · {formatDistance(restaurant.distanceMiles)}</>
               ) : null}
             </p>
-            <h2 id="detail-title">{restaurant.name}</h2>
+            <div className="detail-title-row">
+              <h2 id="detail-title">{restaurant.name}</h2>
+              <button
+                type="button"
+                onClick={() => onCopyName(restaurant.name)}
+                aria-label={`Copy ${restaurant.name}`}
+                title="Copy restaurant name"
+              >
+                <Copy size={15} />
+              </button>
+            </div>
             <span>{restaurant.cuisines.join(" · ")}</span>
           </div>
         </div>

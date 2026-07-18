@@ -494,6 +494,15 @@ export default function RestaurantExplorer() {
     }
   }, []);
 
+  const copyRestaurantName = useCallback(async (name: string) => {
+    try {
+      await navigator.clipboard.writeText(name);
+      setToast(`Copied “${name}”.`);
+    } catch {
+      setToast("The restaurant name could not be copied.");
+    }
+  }, []);
+
   const toggleQuickArray = (
     key: "prices" | "mealPeriods" | "boroughs" | "healthGrades",
     value: string,
@@ -802,6 +811,7 @@ export default function RestaurantExplorer() {
                     saved={saved.has(restaurant.slug)}
                     selected={selectedSlug === restaurant.slug}
                     compact={compactCards}
+                    onCopyName={() => copyRestaurantName(restaurant.name)}
                     onOpen={() => {
                       setSelectedSlug(restaurant.slug);
                       setDetailSlug(restaurant.slug);
@@ -845,6 +855,7 @@ export default function RestaurantExplorer() {
             saved={saved}
             onSelect={setSelectedSlug}
             onOpenDetails={(restaurant) => setDetailSlug(restaurant.slug)}
+            onCopyName={copyRestaurantName}
             onRequestLocation={requestLocation}
             onToggleSaved={toggleSaved}
             layoutKey={`${view}-${filtersOpen}`}
@@ -867,6 +878,7 @@ export default function RestaurantExplorer() {
         restaurant={detailRestaurant}
         saved={detailRestaurant ? saved.has(detailRestaurant.slug) : false}
         onClose={() => setDetailSlug(null)}
+        onCopyName={copyRestaurantName}
         onToggleSaved={() => detailRestaurant && toggleSaved(detailRestaurant.slug)}
       />
 

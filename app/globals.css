@@ -593,11 +593,16 @@ a {
 .restaurant-card-main {
   display: block;
   width: 100%;
+  text-align: left;
+}
+
+.restaurant-card-open-button {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
   cursor: pointer;
   border: 0;
   background: transparent;
-  padding: 0;
-  text-align: left;
 }
 
 .restaurant-card-image-wrap {
@@ -740,12 +745,46 @@ a {
   text-transform: none;
 }
 
+.restaurant-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
 .restaurant-card h3 {
-  margin: 8px 32px 5px 0;
+  min-width: 0;
+  max-width: calc(100% - 31px);
+  flex: 0 1 auto;
+  margin: 8px 0 5px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 21px;
   line-height: 1.12;
   letter-spacing: -0.02em;
+}
+
+.restaurant-name-copy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  cursor: pointer;
+  place-items: center;
+  margin-top: 3px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+  padding: 0;
+  color: var(--ink-faint);
+}
+
+.restaurant-name-copy:hover,
+.restaurant-name-copy:focus-visible {
+  border-color: var(--line);
+  background: #f5f1e8;
+  color: var(--accent-dark);
 }
 
 .restaurant-card-cuisine {
@@ -808,6 +847,7 @@ a {
 
 .restaurant-save-button {
   position: absolute;
+  z-index: 2;
   top: 10px;
   right: 10px;
   display: grid;
@@ -842,7 +882,7 @@ a {
 }
 
 .restaurant-card-compact h3 {
-  margin: 7px 28px 4px 0;
+  margin: 7px 0 4px;
   font-size: 18px;
 }
 
@@ -1583,6 +1623,36 @@ a {
   line-height: 1.1;
 }
 
+.map-peek-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-peek-title-row h3 {
+  min-width: 0;
+  max-width: calc(100% - 33px);
+  flex: 0 1 auto;
+}
+
+.map-peek-title-row button {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  cursor: pointer;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+  color: var(--ink-faint);
+}
+
+.map-peek-title-row button:hover,
+.map-peek-title-row button:focus-visible {
+  color: var(--accent-dark);
+}
+
 .map-peek-meta {
   display: flex;
   align-items: center;
@@ -1787,6 +1857,36 @@ a {
   font-size: 29px;
   line-height: 1.05;
   letter-spacing: -0.03em;
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-title-row h2 {
+  min-width: 0;
+  max-width: calc(100% - 38px);
+  flex: 0 1 auto;
+}
+
+.detail-title-row button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  cursor: pointer;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.detail-title-row button:hover,
+.detail-title-row button:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .detail-actions {
