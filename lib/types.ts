@@ -133,6 +133,8 @@ export type FilterState = {
   dietaryNeeds: string[];
   amenities: string[];
   healthGrades: string[];
+  healthScoreMin: number | null;
+  healthScoreMax: number | null;
   hasMenu: boolean;
   hasReservation: boolean;
   savedOnly: boolean;
@@ -151,6 +153,8 @@ export const EMPTY_FILTERS: FilterState = {
   dietaryNeeds: [],
   amenities: [],
   healthGrades: [],
+  healthScoreMin: null,
+  healthScoreMax: null,
   hasMenu: false,
   hasReservation: false,
   savedOnly: false,

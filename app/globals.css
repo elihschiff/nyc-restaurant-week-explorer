@@ -465,7 +465,7 @@ a {
 
 .view-list .results-header,
 .view-list .restaurant-grid,
-.view-list .load-more-button,
+.view-list .auto-load-sentinel,
 .view-list .empty-results {
   max-width: 1420px;
 }
@@ -870,23 +870,20 @@ a {
   box-shadow: none;
 }
 
-.load-more-button {
+.auto-load-sentinel {
   display: flex;
   width: 100%;
   height: 46px;
-  cursor: pointer;
   align-items: center;
   justify-content: center;
   gap: 8px;
   margin: 22px auto 4px;
-  border: 1px solid var(--line-strong);
-  border-radius: 9px;
-  background: var(--surface);
+  color: var(--ink-soft);
   font-size: 12px;
   font-weight: 800;
 }
 
-.load-more-button span {
+.auto-load-sentinel span {
   color: var(--ink-faint);
   font-size: 10px;
   font-weight: 500;
@@ -1202,6 +1199,152 @@ a {
   padding: 0 9px;
   color: var(--ink);
   font-size: 11px;
+}
+
+.score-range-heading,
+.score-range-values,
+.score-range-limits {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.score-range-heading {
+  gap: 8px;
+  margin-bottom: 13px;
+}
+
+.score-range-heading p {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.score-range-heading button {
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  padding: 2px 0;
+  color: var(--accent-dark);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.score-range-values {
+  margin-bottom: 11px;
+}
+
+.score-range-values label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.score-range-values span {
+  color: var(--ink-faint);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.score-range-values input {
+  min-width: 28px;
+  width: 38px;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+  padding: 0 3px;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: normal;
+  text-align: center;
+  appearance: textfield;
+}
+
+.score-range-values input::-webkit-inner-spin-button,
+.score-range-values input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.score-range-values input:focus-visible {
+  border-color: var(--accent);
+  outline: 3px solid rgba(214, 58, 47, 0.16);
+}
+
+.score-range-slider {
+  position: relative;
+  height: 18px;
+}
+
+.score-range-track {
+  position: absolute;
+  top: 7px;
+  right: 0;
+  left: 0;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #ded9ce 0 var(--score-range-low),
+    var(--accent) var(--score-range-low) var(--score-range-high),
+    #ded9ce var(--score-range-high) 100%
+  );
+}
+
+.score-range-slider input[type="range"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 18px;
+  pointer-events: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+}
+
+.score-range-slider input[type="range"]::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  cursor: grab;
+  pointer-events: auto;
+  appearance: none;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px #b94a40, 0 2px 5px rgba(45, 38, 25, 0.18);
+}
+
+.score-range-slider input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  cursor: grab;
+  pointer-events: auto;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px #b94a40, 0 2px 5px rgba(45, 38, 25, 0.18);
+}
+
+.score-range-slider input[type="range"]:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid rgba(214, 58, 47, 0.25);
+  outline-offset: 2px;
+}
+
+.score-range-slider input[type="range"]:focus-visible::-moz-range-thumb {
+  outline: 3px solid rgba(214, 58, 47, 0.25);
+  outline-offset: 2px;
+}
+
+.score-range-limits {
+  margin-top: 2px;
+  color: var(--ink-faint);
+  font-size: 8px;
 }
 
 .location-filter-button {

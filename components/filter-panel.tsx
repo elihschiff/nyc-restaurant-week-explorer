@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import {
   Check,
   ChevronDown,
@@ -31,6 +31,7 @@ export type ExplorerFacets = {
   dietaryNeeds: FacetOption[];
   amenities: FacetOption[];
   healthGrades: FacetOption[];
+  healthScoreRange: { min: number; max: number } | null;
 };
 
 type ArrayFilterKey =
@@ -174,6 +175,29 @@ export default function FilterPanel({
       return (indexA < 0 ? 99 : indexA) - (indexB < 0 ? 99 : indexB);
     },
   );
+  const scoreBounds = facets.healthScoreRange;
+  const scoreLow = filters.healthScoreMin ?? scoreBounds?.min ?? 0;
+  const scoreHigh = filters.healthScoreMax ?? scoreBounds?.max ?? 0;
+  const scoreSpan = scoreBounds ? Math.max(scoreBounds.max - scoreBounds.min, 1) : 1;
+  const scoreRangeStyle = scoreBounds
+    ? ({
+        "--score-range-low": `${((scoreLow - scoreBounds.min) / scoreSpan) * 100}%`,
+        "--score-range-high": `${((scoreHigh - scoreBounds.min) / scoreSpan) * 100}%`,
+      } as CSSProperties)
+    : undefined;
+  const scoreFilterActive =
+    filters.healthScoreMin !== null || filters.healthScoreMax !== null;
+
+  const updateScoreRange = (low: number, high: number) => {
+    if (!scoreBounds) return;
+    const nextLow = Math.min(Math.max(low, scoreBounds.min), high);
+    const nextHigh = Math.max(Math.min(high, scoreBounds.max), nextLow);
+    onChange({
+      ...filters,
+      healthScoreMin: nextLow === scoreBounds.min ? null : nextLow,
+      healthScoreMax: nextHigh === scoreBounds.max ? null : nextHigh,
+    });
+  };
 
   return (
     <aside className="filter-panel" aria-label="Restaurant filters">
@@ -253,6 +277,104 @@ export default function FilterPanel({
           onToggle={(value) => toggleArray("healthGrades", value)}
           labelTransform={displayHealthGrade}
         />
+
+        {scoreBounds ? (
+          <details className="filter-section" open>
+            <summary>
+              <span>Inspection score</span>
+              {scoreFilterActive ? (
+                <span className="filter-section-count">
+                  {scoreLow}–{scoreHigh}
+                </span>
+              ) : null}
+              <ChevronDown size={15} />
+            </summary>
+            <div className="filter-section-body score-range-filter">
+              <div className="score-range-heading">
+                <p>Lower scores mean fewer violations.</p>
+                {scoreFilterActive ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onChange({
+                        ...filters,
+                        healthScoreMin: null,
+                        healthScoreMax: null,
+                      })
+                    }
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>
+              <div className="score-range-values">
+                <label>
+                  <span>Low</span>
+                  <input
+                    type="number"
+                    min={scoreBounds.min}
+                    max={scoreHigh}
+                    step="1"
+                    value={scoreLow}
+                    aria-label="Lowest inspection score value"
+                    onChange={(event) =>
+                      updateScoreRange(
+                        event.target.value ? Number(event.target.value) : scoreBounds.min,
+                        scoreHigh,
+                      )
+                    }
+                  />
+                </label>
+                <label>
+                  <span>High</span>
+                  <input
+                    type="number"
+                    min={scoreLow}
+                    max={scoreBounds.max}
+                    step="1"
+                    value={scoreHigh}
+                    aria-label="Highest inspection score value"
+                    onChange={(event) =>
+                      updateScoreRange(
+                        scoreLow,
+                        event.target.value ? Number(event.target.value) : scoreBounds.max,
+                      )
+                    }
+                  />
+                </label>
+              </div>
+              <div className="score-range-slider" style={scoreRangeStyle}>
+                <div className="score-range-track" />
+                <input
+                  type="range"
+                  min={scoreBounds.min}
+                  max={scoreBounds.max}
+                  step="1"
+                  value={scoreLow}
+                  aria-label="Lowest inspection score"
+                  onChange={(event) =>
+                    updateScoreRange(Math.min(Number(event.target.value), scoreHigh), scoreHigh)
+                  }
+                />
+                <input
+                  type="range"
+                  min={scoreBounds.min}
+                  max={scoreBounds.max}
+                  step="1"
+                  value={scoreHigh}
+                  aria-label="Highest inspection score"
+                  onChange={(event) =>
+                    updateScoreRange(scoreLow, Math.max(Number(event.target.value), scoreLow))
+                  }
+                />
+              </div>
+              <div className="score-range-limits" aria-hidden="true">
+                <span>{scoreBounds.min}</span>
+                <span>{scoreBounds.max}</span>
+              </div>
+            </div>
+          </details>
+        ) : null}
 
         <details className="filter-section" open>
           <summary>

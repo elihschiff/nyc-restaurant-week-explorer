@@ -94,6 +94,7 @@ function activeFilterCount(filters: FilterState): number {
     filters.dietaryNeeds.length +
     filters.amenities.length +
     filters.healthGrades.length +
+    Number(filters.healthScoreMin !== null || filters.healthScoreMax !== null) +
     Number(filters.hasMenu) +
     Number(filters.hasReservation) +
     Number(filters.savedOnly) +
@@ -127,6 +128,10 @@ function initialBrowserSettings(): {
   const requestedSort = params.get("sort");
   const radius = params.get("radius");
   const parsedRadius = radius === null ? null : Number(radius);
+  const scoreMin = params.get("score-min");
+  const parsedScoreMin = scoreMin === null ? null : Number(scoreMin);
+  const scoreMax = params.get("score-max");
+  const parsedScoreMax = scoreMax === null ? null : Number(scoreMax);
   return {
     query: params.get("q") ?? "",
     view: (["split", "list", "map"] as const).includes(requestedView as ViewMode)
@@ -149,6 +154,10 @@ function initialBrowserSettings(): {
       dietaryNeeds: queryList(params, "diet"),
       amenities: queryList(params, "amenity"),
       healthGrades: queryList(params, "grade"),
+      healthScoreMin:
+        parsedScoreMin !== null && Number.isFinite(parsedScoreMin) ? parsedScoreMin : null,
+      healthScoreMax:
+        parsedScoreMax !== null && Number.isFinite(parsedScoreMax) ? parsedScoreMax : null,
       hasMenu: params.get("menu") === "1",
       hasReservation: params.get("reservation") === "1",
       savedOnly: params.get("saved") === "1",
@@ -254,6 +263,8 @@ export default function RestaurantExplorer() {
   const [locationPending, setLocationPending] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const searchInput = useRef<HTMLInputElement>(null);
+  const resultsRegion = useRef<HTMLElement>(null);
+  const loadMoreSentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const datasetUrl = new URL("data/restaurants.json", document.baseURI).toString();
@@ -293,6 +304,10 @@ export default function RestaurantExplorer() {
     if (filters.hasReservation) params.set("reservation", "1");
     if (filters.savedOnly) params.set("saved", "1");
     if (filters.maxDistance !== null) params.set("radius", String(filters.maxDistance));
+    if (filters.healthScoreMin !== null)
+      params.set("score-min", String(filters.healthScoreMin));
+    if (filters.healthScoreMax !== null)
+      params.set("score-max", String(filters.healthScoreMax));
     const queryString = params.toString();
     window.history.replaceState(null, "", queryString ? `?${queryString}` : window.location.pathname);
   }, [filters, query, sort, view]);
@@ -335,6 +350,13 @@ export default function RestaurantExplorer() {
       healthGrades: countFacet(restaurants, (restaurant) =>
         restaurant.healthInspection ? [restaurant.healthInspection.grade] : [],
       ),
+      healthScoreRange: (() => {
+        const scores = restaurants.flatMap((restaurant) => {
+          const score = restaurant.healthInspection?.score;
+          return typeof score === "number" ? [score] : [];
+        });
+        return scores.length ? { min: Math.min(...scores), max: Math.max(...scores) } : null;
+      })(),
     }),
     [restaurants],
   );
@@ -371,6 +393,15 @@ export default function RestaurantExplorer() {
           !filters.healthGrades.includes(restaurant.healthInspection.grade))
       )
         return false;
+      if (filters.healthScoreMin !== null || filters.healthScoreMax !== null) {
+        const score = restaurant.healthInspection?.score;
+        if (
+          typeof score !== "number" ||
+          (filters.healthScoreMin !== null && score < filters.healthScoreMin) ||
+          (filters.healthScoreMax !== null && score > filters.healthScoreMax)
+        )
+          return false;
+      }
       if (filters.hasMenu && !restaurant.menu) return false;
       if (filters.hasReservation && !restaurant.reservation) return false;
       if (filters.savedOnly && !saved.has(restaurant.slug)) return false;
@@ -393,6 +424,27 @@ export default function RestaurantExplorer() {
   const activeCount = activeFilterCount(filters);
   const resultsKey = JSON.stringify([filters, query, sort, view]);
   const visibleCount = visibleState.key === resultsKey ? visibleState.count : 30;
+
+  useEffect(() => {
+    const sentinel = loadMoreSentinel.current;
+    if (!sentinel || visibleCount >= filteredRestaurants.length) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setVisibleState((current) => {
+          const currentCount = current.key === resultsKey ? current.count : 30;
+          return {
+            key: resultsKey,
+            count: Math.min(currentCount + 30, filteredRestaurants.length),
+          };
+        });
+      },
+      { root: resultsRegion.current, rootMargin: "500px 0px" },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [filteredRestaurants.length, resultsKey, visibleCount]);
 
   const toggleSaved = useCallback((slug: string) => {
     setSaved((current) => {
@@ -455,7 +507,11 @@ export default function RestaurantExplorer() {
     });
   };
 
-  const removeFilter = (key: keyof FilterState, value?: string) => {
+  const removeFilter = (key: keyof FilterState | "healthScoreRange", value?: string) => {
+    if (key === "healthScoreRange") {
+      setFilters({ ...filters, healthScoreMin: null, healthScoreMax: null });
+      return;
+    }
     if (Array.isArray(filters[key])) {
       setFilters({
         ...filters,
@@ -469,7 +525,11 @@ export default function RestaurantExplorer() {
   };
 
   const activeChips = useMemo(() => {
-    const values: Array<{ key: keyof FilterState; value?: string; label: string }> = [];
+    const values: Array<{
+      key: keyof FilterState | "healthScoreRange";
+      value?: string;
+      label: string;
+    }> = [];
     const arrayKeys: Array<keyof FilterState> = [
       "boroughs",
       "neighborhoods",
@@ -494,6 +554,15 @@ export default function RestaurantExplorer() {
     if (filters.savedOnly) values.push({ key: "savedOnly", label: "Saved" });
     if (filters.maxDistance !== null)
       values.push({ key: "maxDistance", label: `Within ${filters.maxDistance} mi` });
+    if (filters.healthScoreMin !== null || filters.healthScoreMax !== null) {
+      const scoreLabel =
+        filters.healthScoreMin !== null && filters.healthScoreMax !== null
+          ? `Score ${filters.healthScoreMin}–${filters.healthScoreMax}`
+          : filters.healthScoreMin !== null
+            ? `Score ${filters.healthScoreMin}+`
+            : `Score ≤ ${filters.healthScoreMax}`;
+      values.push({ key: "healthScoreRange", label: scoreLabel });
+    }
     return values;
   }, [filters]);
 
@@ -685,7 +754,7 @@ export default function RestaurantExplorer() {
           </>
         ) : null}
 
-        <section className="results-region" aria-label="Restaurant results">
+        <section ref={resultsRegion} className="results-region" aria-label="Restaurant results">
           <div className="results-header">
             <div>
               <span className="results-eyebrow">
@@ -743,14 +812,16 @@ export default function RestaurantExplorer() {
                 ))}
               </div>
               {visibleCount < filteredRestaurants.length ? (
-                <button
-                  type="button"
-                  className="load-more-button"
-                  onClick={() => setVisibleState({ key: resultsKey, count: visibleCount + 30 })}
+                <div
+                  ref={loadMoreSentinel}
+                  className="auto-load-sentinel"
+                  role="status"
+                  aria-live="polite"
                 >
-                  Show 30 more
+                  <LoaderCircle size={15} className="spin" aria-hidden="true" />
+                  Loading more restaurants
                   <span>{visibleCount} of {filteredRestaurants.length}</span>
-                </button>
+                </div>
               ) : null}
             </>
           ) : (
