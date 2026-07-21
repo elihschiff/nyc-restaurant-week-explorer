@@ -125,7 +125,8 @@ export type FilterState = {
   boroughs: string[];
   neighborhoods: string[];
   cuisines: string[];
-  prices: string[];
+  lunchPrices: string[];
+  dinnerPrices: string[];
   mealPeriods: string[];
   weeks: string[];
   collections: string[];
@@ -145,7 +146,8 @@ export const EMPTY_FILTERS: FilterState = {
   boroughs: [],
   neighborhoods: [],
   cuisines: [],
-  prices: [],
+  lunchPrices: [],
+  dinnerPrices: [],
   mealPeriods: [],
   weeks: [],
   collections: [],

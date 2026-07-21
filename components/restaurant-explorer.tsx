@@ -36,12 +36,12 @@ import {
   displayHealthGrade,
   displayWeek,
   HEALTH_GRADE_ORDER,
+  mealPrices,
   mealPeriodMatches,
   minimumPrice,
   restaurantDistance,
   restaurantMatchesSearch,
   searchScore,
-  uniquePrices,
 } from "@/lib/explorer";
 import FilterPanel, { type ExplorerFacets, type FacetOption } from "./filter-panel";
 import RestaurantCard from "./restaurant-card";
@@ -86,7 +86,8 @@ function activeFilterCount(filters: FilterState): number {
     filters.boroughs.length +
     filters.neighborhoods.length +
     filters.cuisines.length +
-    filters.prices.length +
+    filters.lunchPrices.length +
+    filters.dinnerPrices.length +
     filters.mealPeriods.length +
     filters.weeks.length +
     filters.collections.length +
@@ -146,7 +147,8 @@ function initialBrowserSettings(): {
       boroughs: queryList(params, "borough"),
       neighborhoods: queryList(params, "neighborhood"),
       cuisines: queryList(params, "cuisine"),
-      prices: queryList(params, "price"),
+      lunchPrices: queryList(params, "lunch-price"),
+      dinnerPrices: queryList(params, "dinner-price"),
       mealPeriods: queryList(params, "meal"),
       weeks: queryList(params, "week"),
       collections: queryList(params, "collection"),
@@ -231,7 +233,8 @@ function sortRestaurants(
 }
 
 function filterLabel(key: keyof FilterState, value: string): string {
-  if (key === "prices") return `$${value}`;
+  if (key === "lunchPrices") return `Lunch $${value}`;
+  if (key === "dinnerPrices") return `Dinner $${value}`;
   if (key === "mealPeriods") {
     return {
       "weekday-lunch": "Weekday lunch",
@@ -288,7 +291,8 @@ export default function RestaurantExplorer() {
       ["borough", filters.boroughs],
       ["neighborhood", filters.neighborhoods],
       ["cuisine", filters.cuisines],
-      ["price", filters.prices],
+      ["lunch-price", filters.lunchPrices],
+      ["dinner-price", filters.dinnerPrices],
       ["meal", filters.mealPeriods],
       ["week", filters.weeks],
       ["collection", filters.collections],
@@ -376,7 +380,10 @@ export default function RestaurantExplorer() {
       if (!directSelected(restaurant.borough, filters.boroughs)) return false;
       if (!directSelected(restaurant.neighborhood, filters.neighborhoods)) return false;
       if (!selectedIn(restaurant.cuisines, filters.cuisines)) return false;
-      if (!selectedIn(uniquePrices(restaurant).map(String), filters.prices)) return false;
+      if (!selectedIn(mealPrices(restaurant, "lunch").map(String), filters.lunchPrices))
+        return false;
+      if (!selectedIn(mealPrices(restaurant, "dinner").map(String), filters.dinnerPrices))
+        return false;
       if (
         filters.mealPeriods.length &&
         !filters.mealPeriods.some((period) => mealPeriodMatches(restaurant, period))
@@ -504,7 +511,7 @@ export default function RestaurantExplorer() {
   }, []);
 
   const toggleQuickArray = (
-    key: "prices" | "mealPeriods" | "boroughs" | "healthGrades",
+    key: "lunchPrices" | "dinnerPrices" | "mealPeriods" | "boroughs" | "healthGrades",
     value: string,
   ) => {
     const current = filters[key];
@@ -543,7 +550,8 @@ export default function RestaurantExplorer() {
       "boroughs",
       "neighborhoods",
       "cuisines",
-      "prices",
+      "lunchPrices",
+      "dinnerPrices",
       "mealPeriods",
       "weeks",
       "collections",
@@ -670,21 +678,22 @@ export default function RestaurantExplorer() {
           </button>
           <span className="quick-divider" />
           {[
-            ["prices", "30", "$30"],
-            ["prices", "45", "$45"],
-            ["prices", "60", "$60"],
+            ["lunchPrices", "30", "Lunch $30"],
+            ["lunchPrices", "45", "Lunch $45"],
+            ["dinnerPrices", "45", "Dinner $45"],
+            ["dinnerPrices", "60", "Dinner $60"],
             ["mealPeriods", "weekday-lunch", "Lunch"],
             ["mealPeriods", "weekday-dinner", "Dinner"],
             ["boroughs", "Brooklyn", "Brooklyn"],
             ["healthGrades", "A", "NYC grade A"],
           ].map(([key, value, label]) => {
-            const active = (filters[key as "prices" | "mealPeriods" | "boroughs" | "healthGrades"] as string[]).includes(value);
+            const active = (filters[key as "lunchPrices" | "dinnerPrices" | "mealPeriods" | "boroughs" | "healthGrades"] as string[]).includes(value);
             return (
               <button
                 type="button"
                 key={`${key}-${value}`}
                 className={`quick-filter ${active ? "is-active" : ""}`}
-                onClick={() => toggleQuickArray(key as "prices" | "mealPeriods" | "boroughs" | "healthGrades", value)}
+                onClick={() => toggleQuickArray(key as "lunchPrices" | "dinnerPrices" | "mealPeriods" | "boroughs" | "healthGrades", value)}
               >
                 {active ? <Check size={13} /> : null}
                 {label}

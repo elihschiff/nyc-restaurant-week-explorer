@@ -38,7 +38,8 @@ type ArrayFilterKey =
   | "boroughs"
   | "neighborhoods"
   | "cuisines"
-  | "prices"
+  | "lunchPrices"
+  | "dinnerPrices"
   | "mealPeriods"
   | "weeks"
   | "collections"
@@ -216,14 +217,28 @@ export default function FilterPanel({
 
       <div className="filter-panel-scroll">
         <section className="filter-quick-section">
-          <div className="filter-mini-title">Prix fixe price</div>
+          <div className="filter-mini-title">Lunch price</div>
           <div className="choice-chip-grid choice-chip-grid-three">
             {["30", "45", "60"].map((price) => (
               <button
                 type="button"
                 key={price}
-                className={filters.prices.includes(price) ? "is-active" : ""}
-                onClick={() => toggleArray("prices", price)}
+                className={filters.lunchPrices.includes(price) ? "is-active" : ""}
+                onClick={() => toggleArray("lunchPrices", price)}
+              >
+                ${price}
+              </button>
+            ))}
+          </div>
+
+          <div className="filter-mini-title">Dinner price</div>
+          <div className="choice-chip-grid choice-chip-grid-three">
+            {["30", "45", "60"].map((price) => (
+              <button
+                type="button"
+                key={price}
+                className={filters.dinnerPrices.includes(price) ? "is-active" : ""}
+                onClick={() => toggleArray("dinnerPrices", price)}
               >
                 ${price}
               </button>

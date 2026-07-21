@@ -84,6 +84,19 @@ export function uniquePrices(restaurant: Restaurant): number[] {
   );
 }
 
+export function mealPrices(
+  restaurant: Restaurant,
+  meal: "lunch" | "dinner",
+): number[] {
+  const keys =
+    meal === "lunch"
+      ? ["lunch", "sunday_lunch_brunch"]
+      : ["dinner", "sunday_dinner"];
+  return [
+    ...new Set(keys.flatMap((key) => restaurant.mealPrices[key] ?? [])),
+  ].sort((a, b) => a - b);
+}
+
 export function displayMealType(value: string): string {
   return value.replace(/ Price$/, "");
 }
